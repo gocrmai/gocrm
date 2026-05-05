@@ -31,8 +31,9 @@ RUN python manage.py collectstatic --noinput || true
 RUN python manage.py migrate --noinput && \
     python manage.py create_superuser --username=gopos --email=info@gopos.hk --password=goposadmin123 || true
 
-# Expose port
-EXPOSE 8000
+# Expose port (Zeabur will set WEB_PORT)
+EXPOSE 8080
 
 # Run the application with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120", "gopos_crm.wsgi:application"]
+# Use $PORT environment variable (Zeabur sets this)
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 gopos_crm.wsgi:application"]

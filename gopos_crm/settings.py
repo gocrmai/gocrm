@@ -16,6 +16,10 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
+# Zeabur PORT configuration - auto-detect
+# Zeabur sets WEB_PORT environment variable, default to 8000 for local development
+PORT = int(os.environ.get('WEB_PORT', os.environ.get('PORT', 8000)))
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
