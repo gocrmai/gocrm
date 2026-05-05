@@ -36,7 +36,7 @@ class TaskForm(ModelForm):
                 'class': 'form-control',
                 'type': 'date',
             }),
-            'attachments': forms.ClearableFileInput(attrs={
+            'attachments': forms.FileInput(attrs={
                 'class': 'form-control',
                 'multiple': True,
             }),
