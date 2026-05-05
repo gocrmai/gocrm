@@ -21,21 +21,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . .
 
-# Create media directory and database
-RUN mkdir -p /app/media/uploads && \
-    touch /app/db.sqlite3 && \
-    chmod 666 /app/db.sqlite3
-
-# Run migrations
-RUN python manage.py migrate --noinput
-
-# Create superuser (will be created if not exists)
-RUN python manage.py shell -c "from apps.users.models import User; \
-if not User.objects.filter(username='gopos').exists(): \
-    User.objects.create_superuser('gopos', 'info@gopos.hk', 'goposadmin123')"
+# Create media directory
+RUN mkdir -p /app/media/uploads
 
 # Expose port 8000
 EXPOSE 8000
 
-# Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120", "gopos_crm.wsgi:application"]
+# Run gunicorn (migrations and superuser will be handled separately via startup script)
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py create_superuser --username=gopos --email=info@gopos.hk --password=goposadmin123 --noinput && gunicorn --bind 0.0.0.0:8000 --workers 2 --threads 4 --timeout 120 gopos_crm.wsgi:application"]
