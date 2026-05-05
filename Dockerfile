@@ -24,15 +24,9 @@ COPY . .
 # Create media directory
 RUN mkdir -p /app/media/uploads
 
-# Collect static files
-RUN python manage.py collectstatic --noinput || true
-
-# Run migrations and create superuser
-RUN python manage.py migrate --noinput && \
-    python manage.py create_superuser --username=gopos --email=info@gopos.hk --password=goposadmin123 || true
-
-# Expose port 8080
+# Expose port
 EXPOSE 8080
 
 # Run gunicorn - bind to PORT env var, default to 8080
-CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 2 --threads 4 --timeout 120 gopos_crm.wsgi:application"]
+# Not running migrations here - will run once at startup
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 2 --threads 4 --timeout 120 gopos_crm.wsgi:application"]
