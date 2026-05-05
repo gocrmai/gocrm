@@ -27,6 +27,10 @@ RUN mkdir -p /app/media/uploads
 # Collect static files
 RUN python manage.py collectstatic --noinput || true
 
+# Run migrations and create superuser
+RUN python manage.py migrate --noinput && \
+    python manage.py create_superuser --username=gopos --email=info@gopos.hk --password=goposadmin123 || true
+
 # Expose port
 EXPOSE 8000
 
