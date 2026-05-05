@@ -16,6 +16,9 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
+# CSRF Trusted Origins for Zeabur
+CSRF_TRUSTED_ORIGINS = ['https://gocrm.zeabur.app', 'http://gocrm.zeabur.app']
+
 # Zeabur PORT configuration - auto-detect
 # Zeabur sets WEB_PORT environment variable, default to 8000 for local development
 PORT = int(os.environ.get('WEB_PORT', os.environ.get('PORT', 8000)))
