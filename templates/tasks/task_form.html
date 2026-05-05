@@ -1,0 +1,64 @@
+{# templates/tasks/task_form.html #}
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - GOPOS CRM{% endblock %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.category.label }}</label>
+                    {{ form.category }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.customer.label }}</label>
+                    {{ form.customer }}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">{{ form.description.label }}</label>
+                {{ form.description }}
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">{{ form.notes.label }}</label>
+                {{ form.notes }}
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.due_date.label }}</label>
+                    {{ form.due_date }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.attachments.label }}</label>
+                    {{ form.attachments }}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">{{ form.assigned_to.label }}</label>
+                <div class="border rounded p-3">
+                    {% for checkbox in form.assigned_to %}
+                    <div class="form-check-inline me-3">
+                        {{ checkbox }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">儲存</button>
+                <a href="{% url 'task_list' %}" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

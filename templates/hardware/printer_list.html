@@ -1,0 +1,85 @@
+{# templates/hardware/printer_list.html #}
+{% extends 'base.html' %}
+
+{% block title %}打印機設備 - GOPOS CRM{% endblock %}
+
+{% block page_title %}打印機設備{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'hardware:printer_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>新增打印機
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" name="search" placeholder="搜尋店名、型號、名稱..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">搜尋</button>
+            </div>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>店名</th>
+                    <th>型號</th>
+                    <th>名稱</th>
+                    <th>IP</th>
+                    <th>S/N</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for printer in printers %}
+                <tr>
+                    <td><strong>{{ printer.customer.shop_name }}</strong></td>
+                    <td>{{ printer.model|default:"-" }}</td>
+                    <td>{{ printer.name|default:"-" }}</td>
+                    <td>{{ printer.ip_address|default:"-" }}</td>
+                    <td>{{ printer.serial_number|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'hardware:printer_edit' printer.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'hardware:printer_delete' printer.pk %}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">暫時沒有打印機資料</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if printers.paginator %}
+    <div class="card-footer">
+        <nav>
+            <ul class="pagination mb-0 justify-content-center">
+                {% if printers.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ printers.previous_page_number }}">上一頁</a>
+                </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link">第 {{ printers.number }} 頁 / 共 {{ printers.paginator.num_pages }} 頁</span>
+                </li>
+                {% if printers.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ printers.next_page_number }}">下一頁</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{# templates/tasks/task_delete.html #}
+{% extends 'base.html' %}
+
+{% block title %}刪除任務 - GOPOS CRM{% endblock %}
+
+{% block page_title %}刪除任務{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="mb-4">確認刪除以下任務？</h5>
+        <table class="table table-borderless">
+            <tr>
+                <td class="text-muted">任務編號：</td>
+                <td><strong>{{ task.task_number }}</strong></td>
+            </tr>
+            <tr>
+                <td class="text-muted">分類：</td>
+                <td><span class="badge {{ task.get_category_display_class }}">{{ task.get_category_display }}</span></td>
+            </tr>
+            <tr>
+                <td class="text-muted">客戶：</td>
+                <td>{{ task.customer.shop_name }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">事項：</td>
+                <td>{{ task.description|truncatewords:20 }}</td>
+            </tr>
+        </table>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">確認刪除</button>
+            <a href="{% url 'task_list' %}" class="btn btn-secondary">取消</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

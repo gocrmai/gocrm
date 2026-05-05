@@ -1,0 +1,14 @@
+{# templates/users/404.html #}
+{% extends 'base.html' %}
+{% block title %}404 Not Found - GOPOS CRM{% endblock %}
+{% block page_title %}404 Not Found{% endblock %}
+{% block content %}
+<div class="card text-center">
+    <div class="card-body">
+        <h1 class="display-1 text-warning">404</h1>
+        <h3>頁面不存在</h3>
+        <p class="text-muted">您訪問的頁面不存在或已被刪除。</p>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">返回儀表板</a>
+    </div>
+</div>
+{% endblock %}

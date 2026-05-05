@@ -1,0 +1,118 @@
+{# templates/tasks/task_list.html #}
+{% extends 'base.html' %}
+
+{% block title %}工作紀錄 - GOPOS CRM{% endblock %}
+
+{% block page_title %}工作紀錄{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'task_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>新建任務
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <input type="text" class="form-control" name="search" placeholder="搜尋任務編號、客戶..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="status">
+                    <option value="">全部狀態</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>待處理</option>
+                    <option value="received" {% if status_filter == 'received' %}selected{% endif %}>已接收</option>
+                    <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>處理中</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>已完成</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>已取消</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="category">
+                    <option value="">全部分類</option>
+                    <option value="installation" {% if category_filter == 'installation' %}selected{% endif %}>安裝</option>
+                    <option value="repair" {% if category_filter == 'repair' %}selected{% endif %}>維修</option>
+                    <option value="menu_update" {% if category_filter == 'menu_update' %}selected{% endif %}>餐牌修改</option>
+                    <option value="system_request" {% if category_filter == 'system_request' %}selected{% endif %}>系統需求</option>
+                    <option value="onsite_service" {% if category_filter == 'onsite_service' %}selected{% endif %}>上門服務</option>
+                    <option value="other" {% if category_filter == 'other' %}selected{% endif %}>其他</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="assigned">
+                    <option value="">全部員工</option>
+                    {% for user in users %}
+                    <option value="{{ user.id }}" {% if assigned_filter == user.id|stringformat:"s" %}selected{% endif %}>{{ user.chinese_name|default:user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary">搜尋</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{% url 'my_tasks' %}" class="btn btn-outline-secondary">我的任務</a>
+            </div>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>任務編號</th>
+                    <th>分類</th>
+                    <th>客戶</th>
+                    <th>指派給</th>
+                    <th>狀態</th>
+                    <th>創建日期</th>
+                    <th>到期日</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr style="cursor: pointer;" onclick="location.href='{% url 'task_detail' task.pk %}'">
+                    <td><strong>{{ task.task_number }}</strong></td>
+                    <td><span class="badge {{ task.get_category_display_class }}">{{ task.get_category_display }}</span></td>
+                    <td>{{ task.customer.shop_name }}</td>
+                    <td>
+                        {% for user in task.assigned_to.all %}
+                        <span class="badge bg-secondary">{{ user.chinese_name|default:user.username }}</span>
+                        {% empty %}
+                        <span class="text-muted">-</span>
+                        {% endfor %}
+                    </td>
+                    <td><span class="badge {{ task.get_status_display_class }}">{{ task.get_status_display }}</span></td>
+                    <td>{{ task.created_at|date:"Y-m-d" }}</td>
+                    <td>{{ task.due_date|date:"Y-m-d"|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">暫時沒有任務</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if tasks.paginator %}
+    <div class="card-footer">
+        <nav>
+            <ul class="pagination mb-0 justify-content-center">
+                {% if tasks.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ tasks.previous_page_number }}">上一頁</a>
+                </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link">第 {{ tasks.number }} 頁 / 共 {{ tasks.paginator.num_pages }} 頁</span>
+                </li>
+                {% if tasks.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ tasks.next_page_number }}">下一頁</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

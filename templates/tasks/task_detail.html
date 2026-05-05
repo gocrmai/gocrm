@@ -1,0 +1,229 @@
+{# templates/tasks/task_detail.html #}
+{% extends 'base.html' %}
+
+{% block title %}{{ task.task_number }} - GOPOS CRM{% endblock %}
+
+{% block page_title %}{{ task.task_number }}{% endblock %}
+
+{% block page_actions %}
+<div>
+    <a href="{% url 'task_print' task.pk %}" target="_blank" class="btn btn-outline-primary">
+        <i class="bi bi-printer me-2"></i>列印維修單
+    </a>
+    {% if task.status != 'completed' and task.status != 'cancelled' %}
+    <a href="{% url 'task_edit' task.pk %}" class="btn btn-outline-primary">
+        <i class="bi bi-pencil me-2"></i>編輯
+    </a>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Task Info -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">任務資料</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="text-muted" style="width: 120px;">任務編號</td>
+                        <td><strong>{{ task.task_number }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">分類</td>
+                        <td>
+                            <span class="badge {{ task.get_category_display_class }}">
+                                {{ task.get_category_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">客戶</td>
+                        <td>
+                            <a href="{% url 'customer_detail' task.customer.pk %}">
+                                {{ task.customer.shop_name }}
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">客戶電話</td>
+                        <td>{{ task.customer.phone }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">客戶地址</td>
+                        <td>{{ task.customer.address|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">創建人</td>
+                        <td>{{ task.created_by.chinese_name|default:task.created_by.username }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">指派給</td>
+                        <td>
+                            {% for user in task.assigned_to.all %}
+                            <span class="badge bg-secondary me-1">{{ user.chinese_name|default:user.username }}</span>
+                            {% empty %}
+                            <span class="text-muted">-</span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">狀態</td>
+                        <td>
+                            <span class="badge {{ task.get_status_display_class }} fs-6">
+                                {{ task.get_status_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">創建日期</td>
+                        <td>{{ task.created_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">到期日</td>
+                        <td>{{ task.due_date|date:"Y-m-d"|default:"-" }}</td>
+                    </tr>
+                    {% if task.completed_at %}
+                    <tr>
+                        <td class="text-muted">完成日期</td>
+                        <td>{{ task.completed_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+        
+        <!-- Description -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">事項描述</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">{{ task.description|linebreaks }}</p>
+            </div>
+        </div>
+        
+        <!-- Notes -->
+        {% if task.notes %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">備註</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-0 text-muted">{{ task.notes|linebreaks }}</p>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Attachments -->
+        {% if task.attachments %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">附件</h5>
+            </div>
+            <div class="card-body">
+                <a href="{{ task.attachments.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-paperclip me-2"></i>{{ task.attachments.name|slice:"-20:" }}
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Actions -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">操作</h5>
+            </div>
+            <div class="card-body">
+                {% if task.status == 'pending' %}
+                    {% if user in task.assigned_to.all %}
+                    <a href="{% url 'task_receive' task.pk %}" class="btn btn-success w-100 mb-2">
+                        <i class="bi bi-check-circle me-2"></i>確認接收任務
+                    </a>
+                    {% endif %}
+                {% endif %}
+                
+                {% if task.status == 'received' or task.status == 'in_progress' %}
+                <a href="{% url 'task_edit' task.pk %}" class="btn btn-primary w-100 mb-2">
+                    <i class="bi bi-pencil me-2"></i>更新進度
+                </a>
+                <a href="{% url 'task_print' task.pk %}" target="_blank" class="btn btn-outline-primary w-100 mb-2">
+                    <i class="bi bi-printer me-2"></i>列印維修單
+                </a>
+                {% endif %}
+                
+                {% if task.status != 'completed' and task.status != 'cancelled' %}
+                <button type="button" class="btn btn-success w-100 mb-2" onclick="completeTask({{ task.pk }})">
+                    <i class="bi bi-check-all me-2"></i>標記為完成
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Status Timeline -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">狀態歷史</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <i class="bi bi-plus-circle text-primary"></i>
+                        <span>創建任務</span>
+                        <small class="text-muted">{{ task.created_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                    {% if task.status != 'pending' %}
+                    <div class="timeline-item">
+                        <i class="bi bi-check-circle text-info"></i>
+                        <span>已接收</span>
+                        {% if task.status == 'received' or task.status == 'in_progress' or task.status == 'completed' %}
+                        <small class="text-muted">{{ task.updated_at|date:"Y-m-d H:i" }}</small>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% if task.status == 'in_progress' %}
+                    <div class="timeline-item">
+                        <i class="bi bi-play-circle text-primary"></i>
+                        <span>處理中</span>
+                    </div>
+                    {% endif %}
+                    {% if task.status == 'completed' %}
+                    <div class="timeline-item">
+                        <i class="bi bi-check-all text-success"></i>
+                        <span>已完成</span>
+                        <small class="text-muted">{{ task.completed_at|date:"Y-m-d H:i" }}</small>
+                    </div>
+                    {% endif %}
+                    {% if task.status == 'cancelled' %}
+                    <div class="timeline-item">
+                        <i class="bi bi-x-circle text-danger"></i>
+                        <span>已取消</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Complete Task Form (Hidden) -->
+<form id="completeForm" method="post" action="{% url 'task_complete' task.pk %}" style="display: none;">
+    {% csrf_token %}
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function completeTask(pk) {
+    if (confirm('確認將此任務標記為完成？')) {
+        document.getElementById('completeForm').submit();
+    }
+}
+</script>
+{% endblock %}

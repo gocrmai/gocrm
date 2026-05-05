@@ -1,0 +1,161 @@
+{# templates/customers/customer_detail.html #}
+{% extends 'base.html' %}
+
+{% block title %}{{ customer.shop_name }} - GOPOS CRM{% endblock %}
+
+{% block page_title %}{{ customer.shop_name }}{% endblock %}
+
+{% block page_actions %}
+<div>
+    <a href="{% url 'customer_edit' customer.pk %}" class="btn btn-outline-primary">
+        <i class="bi bi-pencil me-2"></i>編輯
+    </a>
+    <a href="{% url 'task_create' %}?customer={{ customer.pk }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-2"></i>新建任務
+    </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Customer Info -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">客戶資料</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <td class="text-muted">店名</td>
+                        <td><strong>{{ customer.shop_name }}</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">聯絡人</td>
+                        <td>{{ customer.contact_person }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">電話</td>
+                        <td>{{ customer.phone }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">電郵</td>
+                        <td>{{ customer.email|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">地址</td>
+                        <td>{{ customer.address|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">行業</td>
+                        <td>{{ customer.get_industry_display }}</td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">軟件</td>
+                        <td>
+                            {% for software in customer.get_software_list %}
+                            <span class="badge bg-info me-1">{{ software }}</span>
+                            {% empty %}
+                            -
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">硬體</td>
+                        <td>{{ customer.hardware|default:"-" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">工作紀錄</h5>
+                <a href="{% url 'task_create' %}?customer={{ customer.pk }}" class="btn btn-sm btn-primary">新增</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>編號</th>
+                            <th>分類</th>
+                            <th>狀態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in tasks %}
+                        <tr style="cursor: pointer;" onclick="location.href='{% url 'task_detail' task.pk %}'">
+                            <td>{{ task.task_number }}</td>
+                            <td><span class="badge {{ task.get_category_display_class }}">{{ task.get_category_display }}</span></td>
+                            <td><span class="badge {{ task.get_status_display_class }}">{{ task.get_status_display }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-3">暫時沒有工作紀錄</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hardware -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">硬件設置</h5>
+                <a href="{% url 'hardware:computer_create' %}?customer={{ customer.pk }}" class="btn btn-sm btn-primary">新增</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>設備</th>
+                            <th>型號</th>
+                            <th>主機名/IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for computer in computers %}
+                        <tr style="cursor: pointer;" onclick="location.href='{% url 'hardware:computer_edit' computer.pk %}'">
+                            <td><i class="bi bi-pc"></i> 電腦</td>
+                            <td>{{ computer.model|default:"-" }}</td>
+                            <td>{{ computer.hostname|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% for printer in printers %}
+                        <tr style="cursor: pointer;" onclick="location.href='{% url 'hardware:printer_edit' printer.pk %}'">
+                            <td><i class="bi bi-printer"></i> 打印機</td>
+                            <td>{{ printer.model|default:"-" }}</td>
+                            <td>{{ printer.ip_address|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        {% if not computers %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-3">暫時沒有硬件資料</td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notes -->
+{% if customer.notes %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">備註</h5>
+    </div>
+    <div class="card-body">
+        <p class="mb-0">{{ customer.notes|linebreaks }}</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,33 @@
+{# templates/hardware/computer_delete.html #}
+{% extends 'base.html' %}
+
+{% block title %}刪除電腦 - GOPOS CRM{% endblock %}
+
+{% block page_title %}刪除電腦{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="mb-4">確認刪除以下電腦？</h5>
+        <table class="table table-borderless">
+            <tr>
+                <td class="text-muted">店名：</td>
+                <td>{{ computer.customer.shop_name }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">型號：</td>
+                <td>{{ computer.model|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">主機名：</td>
+                <td>{{ computer.hostname|default:"-" }}</td>
+            </tr>
+        </table>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">確認刪除</button>
+            <a href="{% url 'hardware:computer_list' %}" class="btn btn-secondary">取消</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

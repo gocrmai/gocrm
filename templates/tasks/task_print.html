@@ -1,0 +1,396 @@
+{# templates/tasks/task_print.html #}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ task.task_number }} - 維修單</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            padding: 20px;
+        }
+        
+        .page {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .header h2 {
+            font-size: 14px;
+            font-weight: normal;
+            margin-top: 3px;
+        }
+        
+        .header address {
+            font-size: 11px;
+            font-style: normal;
+            margin-top: 5px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .info-row {
+            display: flex;
+            border-bottom: 1px solid #ccc;
+            padding: 3px 0;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            min-width: 80px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .signature-area {
+            margin-top: 20px;
+            border-top: 1px solid #000;
+            padding-top: 10px;
+        }
+        
+        .signature-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .signature-box {
+            width: 45%;
+            text-align: center;
+        }
+        
+        .signature-box .label {
+            border-bottom: 1px solid #000;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .footer {
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            margin-top: 20px;
+        }
+        
+        /* Split page into two halves */
+        .top-half, .bottom-half {
+            border: 2px solid #000;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .top-half {
+            border-bottom: 1px dashed #ccc;
+        }
+        
+        .bottom-half {
+            border-top: none;
+        }
+        
+        .copy-label {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            font-size: 10px;
+            color: #999;
+        }
+        
+        .half-page {
+            page-break-inside: avoid;
+            position: relative;
+        }
+        
+        .copy-indicator {
+            font-size: 10px;
+            color: #666;
+            text-align: right;
+            margin-bottom: 5px;
+        }
+        
+        .company-copy {
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .customer-copy {
+            padding-top: 15px;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .page {
+                page-break-after: always;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 公司存根 -->
+    <div class="company-copy">
+        <div class="copy-indicator">公司存根</div>
+        <div class="header">
+            <h1>{{ company_name_c }}</h1>
+            <h2>{{ company_name_e }}</h2>
+            <address>
+                地址：{{ company_address }} | 電話：{{ company_tel }} | 傳真：{{ company_fax }} | 電郵：{{ company_email }}
+            </address>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">日期：</span>
+                <span>{{ task.created_at|date:"Y/m/d" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">員工：</span>
+                <span>{{ task.created_by.chinese_name|default:task.created_by.username }}</span>
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">客戶：</span>
+                <span>{{ task.customer.shop_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">電話：</span>
+                <span>{{ task.customer.phone }}</span>
+            </div>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">聯絡人：</span>
+            <span>{{ task.customer.contact_person }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">地址：</span>
+            <span>{{ task.customer.address }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">型號：</span>
+            <span>-</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">S/N：</span>
+            <span>-</span>
+        </div>
+        
+        <div style="margin: 10px 0; display: flex; gap: 20px;">
+            <span>保養期內：</span>
+            <div class="checkbox-item"><input type="checkbox"> ☑</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐</div>
+        </div>
+        
+        <div class="info-row" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+            <span class="info-label">事項：</span>
+            <span>{{ task.description }}</span>
+        </div>
+        
+        <div class="checkbox-group">
+            <div class="checkbox-item"><input type="checkbox"> ☑ 現場更換零件</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 安裝新機</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 取走維修</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 送回維修機</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 更新系統</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 暫借硬件</div>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">零件 S/N：</span>
+            <span>-</span>
+        </div>
+        
+        <div class="checkbox-group">
+            <div class="checkbox-item"><input type="checkbox"> ☐ 測試正常</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 需收費</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 回收硬件 S/N：</div>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">收費內容：</span>
+            <span>待客戶測試使用正常後才收費</span>
+        </div>
+        
+        <div class="signature-row">
+            <div class="signature-box">
+                <div class="label">客戶簽名或蓋印</div>
+                <small>Authorized Signature(s)</small>
+            </div>
+            <div class="signature-box">
+                <div class="label">員工簽名</div>
+                <small>&nbsp;</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 客戶存根 -->
+    <div class="customer-copy">
+        <div class="copy-indicator">客戶存根</div>
+        <div class="header">
+            <h1>{{ company_name_c }}</h1>
+            <h2>{{ company_name_e }}</h2>
+            <address>
+                地址：{{ company_address }} | 電話：{{ company_tel }} | 傳真：{{ company_fax }} | 電郵：{{ company_email }}
+            </address>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">日期：</span>
+                <span>{{ task.created_at|date:"Y/m/d" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">員工：</span>
+                <span>{{ task.created_by.chinese_name|default:task.created_by.username }}</span>
+            </div>
+        </div>
+        
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">客戶：</span>
+                <span>{{ task.customer.shop_name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">電話：</span>
+                <span>{{ task.customer.phone }}</span>
+            </div>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">聯絡人：</span>
+            <span>{{ task.customer.contact_person }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">地址：</span>
+            <span>{{ task.customer.address }}</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">型號：</span>
+            <span>-</span>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">S/N：</span>
+            <span>-</span>
+        </div>
+        
+        <div style="margin: 10px 0; display: flex; gap: 20px;">
+            <span>保養期內：</span>
+            <div class="checkbox-item"><input type="checkbox"> ☑</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐</div>
+        </div>
+        
+        <div class="info-row" style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+            <span class="info-label">事項：</span>
+            <span>{{ task.description }}</span>
+        </div>
+        
+        <div class="checkbox-group">
+            <div class="checkbox-item"><input type="checkbox"> ☑ 現場更換零件</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 安裝新機</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 取走維修</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 送回維修機</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 更新系統</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 暫借硬件</div>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">零件 S/N：</span>
+            <span>-</span>
+        </div>
+        
+        <div class="checkbox-group">
+            <div class="checkbox-item"><input type="checkbox"> ☐ 測試正常</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 需收費</div>
+            <div class="checkbox-item"><input type="checkbox"> ☐ 回收硬件 S/N：</div>
+        </div>
+        
+        <div class="info-row">
+            <span class="info-label">收費內容：</span>
+            <span>待客戶測試使用正常後才收費</span>
+        </div>
+        
+        <div class="signature-row">
+            <div class="signature-box">
+                <div class="label">客戶簽名或蓋印</div>
+                <small>Authorized Signature(s)</small>
+            </div>
+            <div class="signature-box">
+                <div class="label">員工簽名</div>
+                <small>&nbsp;</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <button onclick="window.print()" class="no-print btn" style="background: #0066CC; color: white; padding: 10px 30px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px;">
+            列印維修單
+        </button>
+    </div>
+</body>
+</html>

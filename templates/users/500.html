@@ -1,0 +1,14 @@
+{# templates/users/500.html #}
+{% extends 'base.html' %}
+{% block title %}500 Server Error - GOPOS CRM{% endblock %}
+{% block page_title %}500 Server Error{% endblock %}
+{% block content %}
+<div class="card text-center">
+    <div class="card-body">
+        <h1 class="display-1 text-danger">500</h1>
+        <h3>伺服器錯誤</h3>
+        <p class="text-muted">伺服器發生錯誤，請稍後再試。</p>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">返回儀表板</a>
+    </div>
+</div>
+{% endblock %}

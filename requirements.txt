@@ -1,0 +1,22 @@
+# Django
+Django>=4.2,<5.0
+
+# Database
+psycopg2-binary>=2.9.9  # PostgreSQL adapter
+
+# PDF Generation
+weasyprint>=60.0  # HTML to PDF
+reportlab>=4.0  # PDF generation
+
+# Image processing
+Pillow>=10.0.0
+
+# API & Notifications
+django-notifications-hq>=3.3.0  # in-app notifications
+
+# Utilities
+python-dotenv>=1.0.0  # environment variables
+whitenoise>=6.6.0  # static files on Zeabur
+
+# PWA
+pwa>=0.0.2

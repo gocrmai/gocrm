@@ -1,0 +1,87 @@
+{# templates/hardware/computer_list.html #}
+{% extends 'base.html' %}
+
+{% block title %}電腦設備 - GOPOS CRM{% endblock %}
+
+{% block page_title %}電腦設備{% endblock %}
+
+{% block page_actions %}
+<a href="{% url 'hardware:computer_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>新增電腦
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" name="search" placeholder="搜尋店名、型號、主機名..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">搜尋</button>
+            </div>
+        </form>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>店名</th>
+                    <th>型號</th>
+                    <th>主機名</th>
+                    <th>Rustdesk ID</th>
+                    <th>Anydesk ID</th>
+                    <th>保養期</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for computer in computers %}
+                <tr>
+                    <td><strong>{{ computer.customer.shop_name }}</strong></td>
+                    <td>{{ computer.model|default:"-" }}</td>
+                    <td>{{ computer.hostname|default:"-" }}</td>
+                    <td>{{ computer.rustdesk_id|default:"-" }}</td>
+                    <td>{{ computer.anydesk_id|default:"-" }}</td>
+                    <td>{{ computer.warranty_expiry|date:"Y-m-d"|default:"-" }}</td>
+                    <td>
+                        <a href="{% url 'hardware:computer_edit' computer.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'hardware:computer_delete' computer.pk %}" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">暫時沒有電腦資料</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if computers.paginator %}
+    <div class="card-footer">
+        <nav>
+            <ul class="pagination mb-0 justify-content-center">
+                {% if computers.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ computers.previous_page_number }}">上一頁</a>
+                </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link">第 {{ computers.number }} 頁 / 共 {{ computers.paginator.num_pages }} 頁</span>
+                </li>
+                {% if computers.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ computers.next_page_number }}">下一頁</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{# templates/users/login.html #}
+{% extends 'base.html' %}
+
+{% block login_content %}
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #0066CC 0%, #004999 100%);">
+    <div style="background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); overflow: hidden; max-width: 400px; width: 100%;">
+        <div style="background: #0066CC; color: white; padding: 30px; text-align: center;">
+            <h1 style="font-size: 28px; font-weight: 700; margin: 0;">GOPOS CRM</h1>
+            <p style="margin: 10px 0 0; opacity: 0.9;">創域科技客戶關係管理系統</p>
+        </div>
+        <div style="padding: 40px 30px;">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">用戶名稱</label>
+                    <input type="text" class="form-control" id="username" name="username" required autofocus>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">密碼</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn" style="background: #0066CC; color: white; width: 100%; padding: 12px; font-size: 16px; font-weight: 500; border: none; border-radius: 8px;">
+                    登入
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

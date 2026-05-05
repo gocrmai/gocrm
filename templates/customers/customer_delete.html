@@ -1,0 +1,33 @@
+{# templates/customers/customer_delete.html #}
+{% extends 'base.html' %}
+
+{% block title %}刪除客戶 - GOPOS CRM{% endblock %}
+
+{% block page_title %}刪除客戶{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="mb-4">確認刪除以下客戶？</h5>
+        <table class="table table-borderless">
+            <tr>
+                <td class="text-muted">店名：</td>
+                <td><strong>{{ customer.shop_name }}</strong></td>
+            </tr>
+            <tr>
+                <td class="text-muted">聯絡人：</td>
+                <td>{{ customer.contact_person }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">電話：</td>
+                <td>{{ customer.phone }}</td>
+            </tr>
+        </table>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">確認刪除</button>
+            <a href="{% url 'customer_list' %}" class="btn btn-secondary">取消</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{# templates/hardware/printer_delete.html #}
+{% extends 'base.html' %}
+
+{% block title %}刪除打印機 - GOPOS CRM{% endblock %}
+
+{% block page_title %}刪除打印機{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        <h5 class="mb-4">確認刪除以下打印機？</h5>
+        <table class="table table-borderless">
+            <tr>
+                <td class="text-muted">店名：</td>
+                <td>{{ printer.customer.shop_name }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">型號：</td>
+                <td>{{ printer.model|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td class="text-muted">名稱：</td>
+                <td>{{ printer.name|default:"-" }}</td>
+            </tr>
+        </table>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">確認刪除</button>
+            <a href="{% url 'hardware:printer_list' %}" class="btn btn-secondary">取消</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

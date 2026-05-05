@@ -1,0 +1,139 @@
+{# templates/users/dashboard.html #}
+{% extends 'base.html' %}
+{% load task_extras %}
+
+{% block title %}儀表板 - GOPOS CRM{% endblock %}
+
+{% block page_title %}儀表板{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Stats Cards -->
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="d-flex align-items-center">
+                <div style="width: 50px; height: 50px; background: #e6f0ff; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-people" style="font-size: 24px; color: #0066CC;"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0">{{ total_customers }}</h3>
+                    <small class="text-muted">客戶總數</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="d-flex align-items-center">
+                <div style="width: 50px; height: 50px; background: #fff3e6; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-clock" style="font-size: 24px; color: #FF6600;"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0">{{ pending_tasks }}</h3>
+                    <small class="text-muted">待處理任務</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="d-flex align-items-center">
+                <div style="width: 50px; height: 50px; background: #e6fff0; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-play-circle" style="font-size: 24px; color: #28a745;"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0">{{ in_progress_tasks }}</h3>
+                    <small class="text-muted">處理中</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card p-3">
+            <div class="d-flex align-items-center">
+                <div style="width: 50px; height: 50px; background: #f0e6ff; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-check-circle" style="font-size: 24px; color: #6f42c1;"></i>
+                </div>
+                <div class="ms-3">
+                    <h3 class="mb-0">{{ completed_tasks }}</h3>
+                    <small class="text-muted">已完成</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Tasks -->
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">最近任務</h5>
+        <a href="{% url 'task_list' %}" class="btn btn-sm btn-primary">查看全部</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>任務編號</th>
+                    <th>分類</th>
+                    <th>客戶</th>
+                    <th>狀態</th>
+                    <th>創建日期</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in recent_tasks %}
+                <tr style="cursor: pointer;" onclick="location.href='{% url 'task_detail' task.pk %}'">
+                    <td><strong>{{ task.task_number }}</strong></td>
+                    <td>
+                        <span class="badge {{ task.get_category_display_class }}">{{ task.get_category_display }}</span>
+                    </td>
+                    <td>{{ task.customer.shop_name }}</td>
+                    <td>
+                        <span class="badge {{ task.get_status_display_class }}">{{ task.get_status_display }}</span>
+                    </td>
+                    <td>{{ task.created_at|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">暫時沒有任務</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0">快速操作</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <a href="{% url 'customer_create' %}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-plus-circle me-2"></i>新增客戶
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'task_create' %}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-plus-circle me-2"></i>新建任務
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'my_tasks' %}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-clipboard-check me-2"></i>我的任務
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'customer_list' %}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-people me-2"></i>客戶列表
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
