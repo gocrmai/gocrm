@@ -27,5 +27,5 @@ RUN mkdir -p /app/media/uploads
 # Expose port
 EXPOSE 8080
 
-# Debug startup - just test import
-CMD ["python", "-c", "import sys; sys.path.insert(0, '/app'); from gopos_crm.wsgi import application; print('WSGI import OK')"]
+# Run gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "4", "--timeout", "120", "gopos_crm.wsgi:application"]

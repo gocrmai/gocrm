@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Third party
-    'django_filters',
+    # django_filters - not installed
     # Local apps
     'apps.users',
     'apps.customers',
