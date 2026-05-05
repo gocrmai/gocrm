@@ -31,8 +31,8 @@ RUN python manage.py collectstatic --noinput || true
 RUN python manage.py migrate --noinput && \
     python manage.py create_superuser --username=gopos --email=info@gopos.hk --password=goposadmin123 || true
 
-# Expose port
+# Expose port 8080
 EXPOSE 8080
 
-# Run gunicorn with explicit port binding
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "4", "--timeout", "120", "gopos_crm.wsgi:application"]
+# Run gunicorn - bind to PORT env var, default to 8080
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 2 --threads 4 --timeout 120 gopos_crm.wsgi:application"]
