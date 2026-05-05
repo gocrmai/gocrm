@@ -24,8 +24,12 @@ COPY . .
 # Create media directory
 RUN mkdir -p /app/media/uploads
 
-# Expose port 8000 (Zeabur uses port 8000 internally)
+# Run migrations and create superuser
+RUN python manage.py migrate --noinput && \
+    python manage.py create_superuser --username=gopos --email=info@gopos.hk --password=goposadmin123 || true
+
+# Expose port 8000
 EXPOSE 8000
 
-# Run gunicorn on port 8000
+# Run gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120", "gopos_crm.wsgi:application"]
