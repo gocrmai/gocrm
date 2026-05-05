@@ -24,8 +24,8 @@ COPY . .
 # Create media directory
 RUN mkdir -p /app/media/uploads
 
-# Expose port
-EXPOSE 8080
+# Expose port 8000 (Zeabur uses port 8000 internally)
+EXPOSE 8000
 
-# Run gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "4", "--timeout", "120", "gopos_crm.wsgi:application"]
+# Run gunicorn on port 8000
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "2", "--threads", "4", "--timeout", "120", "gopos_crm.wsgi:application"]
