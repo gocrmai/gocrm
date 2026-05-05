@@ -72,10 +72,17 @@ TEMPLATES = [
 WSGI_APPLICATION = 'gopos_crm.wsgi.application'
 
 # Database - SQLite for local, PostgreSQL for production (Zeabur)
+import os
+
+db_path = BASE_DIR / 'db.sqlite3'
+if not db_path.exists():
+    # Create empty database file
+    open(db_path, 'a').close()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': db_path,
     }
 }
 
