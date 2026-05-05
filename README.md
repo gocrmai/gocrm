@@ -1,4 +1,4 @@
-# GOPOS CRM System
+# GOPOS CRM
 
 創域科技有限公司客戶關係管理系統
 
@@ -15,7 +15,7 @@
 
 - Python 3 + Django 4
 - Bootstrap 5
-- SQLite / PostgreSQL
+- PostgreSQL
 - 部署平台：Zeabur
 
 ## 開發環境
