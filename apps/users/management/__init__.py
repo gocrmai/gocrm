@@ -1,1 +1,1 @@
-# This file is required for Python package</
+# This file is required for Python package

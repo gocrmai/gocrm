@@ -27,6 +27,5 @@ RUN mkdir -p /app/media/uploads
 # Expose port
 EXPOSE 8080
 
-# Run gunicorn - bind to PORT env var, default to 8080
-# Not running migrations here - will run once at startup
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn --bind 0.0.0.0:${PORT:-8080} --workers 2 --threads 4 --timeout 120 gopos_crm.wsgi:application"]
+# Run gunicorn directly - migrations handled separately
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "4", "--timeout", "120", "gopos_crm.wsgi:application"]
