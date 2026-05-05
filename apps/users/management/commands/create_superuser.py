@@ -13,6 +13,7 @@ class Command(BaseCommand):
         parser.add_argument('--username', default='gopos', help='Username')
         parser.add_argument('--email', default='info@gopos.hk', help='Email')
         parser.add_argument('--password', default='goposadmin123', help='Password')
+        parser.add_argument('--noinput', action='store_true', help='Skip confirmation')
 
     def handle(self, *args, **options):
         username = options['username']
