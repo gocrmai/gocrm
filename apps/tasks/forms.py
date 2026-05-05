@@ -38,7 +38,6 @@ class TaskForm(ModelForm):
             }),
             'attachments': forms.FileInput(attrs={
                 'class': 'form-control',
-                'multiple': True,
             }),
         }
 
