@@ -1,0 +1,311 @@
+{# templates/reports/dashboard.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}GOPOS 報表系統{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-primary bg-opacity-10 rounded-3 p-2 me-3">
+                            <i class="bi bi-currency-dollar text-primary fs-4"></i>
+                        </div>
+                        <small class="text-muted">本月營業額</small>
+                    </div>
+                    <h3 class="mb-1" id="totalRevenue">$0</h3>
+                    <small class="text-success" id="revenueChange">
+                        <i class="bi bi-arrow-up"></i> 0%
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-warning bg-opacity-10 rounded-3 p-2 me-3">
+                            <i class="bi bi-receipt text-warning fs-4"></i>
+                        </div>
+                        <small class="text-muted">總訂單數</small>
+                    </div>
+                    <h3 class="mb-1" id="totalOrders">0</h3>
+                    <small class="text-success" id="ordersChange">
+                        <i class="bi bi-arrow-up"></i> 0%
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-info bg-opacity-10 rounded-3 p-2 me-3">
+                            <i class="bi bi-people text-info fs-4"></i>
+                        </div>
+                        <small class="text-muted">總顧客數</small>
+                    </div>
+                    <h3 class="mb-1" id="totalCustomers">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="bg-success bg-opacity-10 rounded-3 p-2 me-3">
+                            <i class="bi bi-cart-check text-success fs-4"></i>
+                        </div>
+                        <small class="text-muted">平均客單</small>
+                    </div>
+                    <h3 class="mb-1" id="avgOrder">$0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">選擇店鋪</label>
+                    <select class="form-select" id="storeFilter" multiple>
+                        <option value="">全部店鋪</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">日期範圍</label>
+                    <select class="form-select" id="dateFilter">
+                        <option value="7">本週</option>
+                        <option value="14">近兩週</option>
+                        <option value="30">本月</option>
+                        <option value="90">近三個月</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" onclick="loadDashboard()">
+                        <i class="bi bi-search me-2"></i>查詢
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">
+                <i class="bi bi-graph-up me-2"></i>營業額走勢
+            </h5>
+            <canvas id="trendChart" height="300"></canvas>
+        </div>
+    </div>
+
+    <!-- Store Performance Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">
+                <i class="bi bi-building me-2"></i>店鋪表現
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">店鋪</th>
+                            <th>營業額</th>
+                            <th>訂單數</th>
+                            <th>顧客數</th>
+                            <th>平均客單</th>
+                            <th class="pe-4">變化</th>
+                        </tr>
+                    </thead>
+                    <tbody id="storeTable">
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="bi bi-hourglass-split me-2"></i>載入中...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let trendChart = null;
+    
+    // Format currency
+    function formatCurrency(value) {
+        return '$' + Number(value).toLocaleString('zh-HK', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+    }
+    
+    // Load dashboard data
+    async function loadDashboard() {
+        const days = document.getElementById('dateFilter').value;
+        const stores = Array.from(document.getElementById('storeFilter').selectedOptions)
+                            .map(opt => opt.value)
+                            .filter(v => v);
+        const storeParam = stores.length > 0 ? `&stores=${stores.join(',')}` : '';
+        
+        try {
+            // Load dashboard summary
+            const dashRes = await fetch(`/reports/api/dashboard/?days=${days}${storeParam}`);
+            const dashData = await dashRes.json();
+            
+            document.getElementById('totalRevenue').textContent = formatCurrency(dashData.total_revenue);
+            document.getElementById('totalOrders').textContent = Number(dashData.total_orders).toLocaleString();
+            document.getElementById('totalCustomers').textContent = Number(dashData.total_customers).toLocaleString();
+            document.getElementById('avgOrder').textContent = formatCurrency(dashData.avg_order_value);
+            
+            const revenueChangeEl = document.getElementById('revenueChange');
+            revenueChangeEl.innerHTML = `<i class="bi bi-arrow-${dashData.revenue_change >= 0 ? 'up' : 'down'}"></i> ${Math.abs(dashData.revenue_change).toFixed(1)}%`;
+            revenueChangeEl.className = dashData.revenue_change >= 0 ? 'text-success' : 'text-danger';
+            
+            const ordersChangeEl = document.getElementById('ordersChange');
+            ordersChangeEl.innerHTML = `<i class="bi bi-arrow-${dashData.orders_change >= 0 ? 'up' : 'down'}"></i> ${Math.abs(dashData.orders_change).toFixed(1)}%`;
+            ordersChangeEl.className = dashData.orders_change >= 0 ? 'text-success' : 'text-danger';
+            
+            // Load trend chart
+            const trendRes = await fetch(`/reports/api/trend/?days=${days}${storeParam}`);
+            const trendData = await trendRes.json();
+            
+            updateTrendChart(trendData);
+            
+            // Load store performance
+            const perfRes = await fetch(`/reports/api/performance/${storeParam}`);
+            const perfData = await perfRes.json();
+            
+            updateStoreTable(perfData);
+            
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+        }
+    }
+    
+    // Update trend chart
+    function updateTrendChart(data) {
+        const ctx = document.getElementById('trendChart').getContext('2d');
+        
+        if (trendChart) {
+            trendChart.destroy();
+        }
+        
+        const labels = data.map(d => d.date);
+        const values = data.map(d => Number(d.revenue));
+        
+        trendChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '營業額',
+                    data: values,
+                    backgroundColor: 'rgba(0, 102, 204, 0.8)',
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return formatCurrency(context.raw);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + (value / 1000) + 'k';
+                            }
+                        },
+                        grid: { color: '#f0f0f0' }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+    
+    // Update store table
+    function updateStoreTable(stores) {
+        const tbody = document.getElementById('storeTable');
+        
+        if (stores.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox me-2"></i>暫無數據
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+        
+        tbody.innerHTML = stores.map(store => `
+            <tr>
+                <td class="ps-4">
+                    <div class="fw-semibold">${store.store_name}</div>
+                    <small class="text-muted">${store.location || ''}</small>
+                </td>
+                <td><strong class="text-primary">${formatCurrency(store.revenue)}</strong></td>
+                <td>${Number(store.order_count).toLocaleString()}</td>
+                <td>${Number(store.customer_count).toLocaleString()}</td>
+                <td>${formatCurrency(store.avg_order_value)}</td>
+                <td class="pe-4">
+                    <span class="badge ${store.revenue_change >= 0 ? 'bg-success' : 'bg-danger'}">
+                        ${store.revenue_change >= 0 ? '↑' : '↓'} ${Math.abs(store.revenue_change).toFixed(1)}%
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+    }
+    
+    // Load store list on page load
+    async function loadStores() {
+        try {
+            const res = await fetch('/reports/api/stores/');
+            const stores = await res.json();
+            
+            const select = document.getElementById('storeFilter');
+            select.innerHTML = '<option value="">全部店鋪</option>';
+            
+            stores.forEach(store => {
+                const option = document.createElement('option');
+                option.value = store.id;
+                option.textContent = store.name;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading stores:', error);
+        }
+    }
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStores().then(() => {
+            loadDashboard();
+        });
+    });
+</script>
+{% endblock %}

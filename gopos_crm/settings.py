@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'apps.customers',
     'apps.tasks',
     'apps.hardware',
-]
+    'reports',
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>GOPOS 餐飲報表系統 - 效果圖</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background: #F5F7FA;
+            color: #333;
+            max-width: 430px;
+            margin: 0 auto;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #0066CC 0%, #0052a3 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #0066CC;
+            font-weight: bold;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        /* Stats Cards */
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stat-change {
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .stat-change.up { color: #90EE90; }
+        .stat-change.down { color: #FFB6C1; }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            padding: 16px;
+            margin: -20px 12px 12px 12px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            position: relative;
+            z-index: 10;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            background: #F5F7FA;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:active {
+            background: #E8EEF5;
+            transform: scale(0.98);
+        }
+
+        .filter-btn.active {
+            background: #0066CC;
+            color: white;
+        }
+
+        .filter-icon {
+            font-size: 18px;
+        }
+
+        .filter-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .dropdown-icon {
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        /* Date Quick Select */
+        .date-quick {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .date-chip {
+            flex-shrink: 0;
+            background: #F5F7FA;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .date-chip:active {
+            background: #E0E5EA;
+            transform: scale(0.95);
+        }
+
+        .date-chip.active {
+            background: #0066CC;
+            color: white;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background: white;
+            margin: 12px;
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-action {
+            color: #0066CC;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .chart-container {
+            height: 200px;
+            position: relative;
+        }
+
+        /* Store List */
+        .store-list {
+            padding: 0 12px;
+        }
+
+        .store-item {
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .store-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #0066CC 0%, #0052a3 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .store-info {
+            flex: 1;
+        }
+
+        .store-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .store-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .store-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .store-revenue {
+            text-align: right;
+        }
+
+        .revenue-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #0066CC;
+        }
+
+        .revenue-change {
+            font-size: 12px;
+            color: #28A745;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 2px;
+            margin-top: 4px;
+        }
+
+        .revenue-change.down {
+            color: #DC3545;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            background: white;
+            padding: 12px 20px 20px;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:active {
+            background: #F5F7FA;
+            transform: scale(0.95);
+        }
+
+        .nav-item.active {
+            color: #0066CC;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Loading Animation */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 430px;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            background: #F5F7FA;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .store-select-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .store-select-item:active {
+            background: #F5F7FA;
+        }
+
+        .store-select-item.selected {
+            background: #E6F0FF;
+            border: 2px solid #0066CC;
+        }
+
+        .checkbox {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #DDD;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: white;
+            background: white;
+        }
+
+        .store-select-item.selected .checkbox {
+            background: #0066CC;
+            border-color: #0066CC;
+        }
+
+        .store-select-icon {
+            font-size: 24px;
+        }
+
+        .store-select-info {
+            flex: 1;
+        }
+
+        .store-select-name {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .store-select-location {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .btn-apply {
+            background: #0066CC;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 16px;
+            cursor: pointer;
+        }
+
+        .btn-apply:active {
+            background: #0052a3;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="header-top">
+            <div class="logo">
+                <div class="logo-icon">G</div>
+                GOPOS 報表系統
+            </div>
+            <div class="user-avatar">👤</div>
+        </div>
+        
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">本月營業額</div>
+                <div class="stat-value">$1,234,567</div>
+                <div class="stat-change up">↑ 12.5%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">總訂單數</div>
+                <div class="stat-value">8,432</div>
+                <div class="stat-change up">↑ 8.3%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">平均客單</div>
+                <div class="stat-value">$146</div>
+                <div class="stat-change down">↓ 2.1%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-row">
+            <div class="filter-btn" onclick="showStoreModal()">
+                <span class="filter-icon">🏪</span>
+                <span class="filter-text" id="selectedStores">全部店鋪</span>
+                <span class="dropdown-icon">▼</span>
+            </div>
+            <div class="filter-btn" onclick="showDateModal()">
+                <span class="filter-icon">📅</span>
+                <span class="filter-text" id="selectedDate">本週</span>
+                <span class="dropdown-icon">▼</span>
+            </div>
+        </div>
+        <div class="date-quick">
+            <button class="date-chip" onclick="selectDate(this, 'today')">今日</button>
+            <button class="date-chip" onclick="selectDate(this, 'yesterday')">昨日</button>
+            <button class="date-chip active" onclick="selectDate(this, 'week')">本週</button>
+            <button class="date-chip" onclick="selectDate(this, 'month')">本月</button>
+            <button class="date-chip" onclick="selectDate(this, 'custom')">自訂</button>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-section">
+        <div class="section-header">
+            <div class="section-title">
+                <span>📈</span>
+                本週營業額走勢
+            </div>
+            <div class="section-action">圖表分析</div>
+        </div>
+        <div class="chart-container">
+            <canvas id="salesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Store List -->
+    <div class="store-list">
+        <div class="section-header" style="margin-bottom: 12px;">
+            <div class="section-title">
+                <span>🏪</span>
+                各店今日表現
+            </div>
+            <div class="section-action">查看全部</div>
+        </div>
+
+        <div class="store-item">
+            <div class="store-icon">🍜</div>
+            <div class="store-info">
+                <div class="store-name">銅鑼灣店</div>
+                <div class="store-meta">
+                    <span>📋 234單</span>
+                    <span>👥 456人</span>
+                </div>
+            </div>
+            <div class="store-revenue">
+                <div class="revenue-amount">$12,345</div>
+                <div class="revenue-change">
+                    <span>↑ 15.2%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="store-item">
+            <div class="store-icon">🍜</div>
+            <div class="store-info">
+                <div class="store-name">尖沙咀店</div>
+                <div class="store-meta">
+                    <span>📋 198單</span>
+                    <span>👥 389人</span>
+                </div>
+            </div>
+            <div class="store-revenue">
+                <div class="revenue-amount">$10,234</div>
+                <div class="revenue-change">
+                    <span>↑ 8.7%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="store-item">
+            <div class="store-icon">🍜</div>
+            <div class="store-info">
+                <div class="store-name">中環店</div>
+                <div class="store-meta">
+                    <span>📋 167單</span>
+                    <span>👥 312人</span>
+                </div>
+            </div>
+            <div class="store-revenue">
+                <div class="revenue-amount">$8,567</div>
+                <div class="revenue-change down">
+                    <span>↓ 3.2%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="store-item">
+            <div class="store-icon">🍜</div>
+            <div class="store-info">
+                <div class="store-name">旺角店</div>
+                <div class="store-meta">
+                    <span>📋 145單</span>
+                    <span>👥 278人</span>
+                </div>
+            </div>
+            <div class="store-revenue">
+                <div class="revenue-amount">$7,890</div>
+                <div class="revenue-change">
+                    <span>↑ 22.1%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="store-item">
+            <div class="store-icon">🍜</div>
+            <div class="store-info">
+                <div class="store-name">九龍塘店</div>
+                <div class="store-meta">
+                    <span>📋 123單</span>
+                    <span>👥 234人</span>
+                </div>
+            </div>
+            <div class="store-revenue">
+                <div class="revenue-amount">$6,543</div>
+                <div class="revenue-change">
+                    <span>↑ 5.4%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active">
+            <div class="nav-icon">📊</div>
+            <div class="nav-label">總覽</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">📈</div>
+            <div class="nav-label">報表</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">🏪</div>
+            <div class="nav-label">店鋪</div>
+        </div>
+        <div class="nav-item">
+            <div class="nav-icon">⚙️</div>
+            <div class="nav-label">設定</div>
+        </div>
+    </div>
+
+    <!-- Store Select Modal -->
+    <div class="modal-overlay" id="storeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">選擇店鋪</div>
+                <div class="modal-close" onclick="closeStoreModal()">✕</div>
+            </div>
+            
+            <div class="store-select-item selected" onclick="toggleSelect(this)">
+                <div class="checkbox">✓</div>
+                <div class="store-select-icon">🏪</div>
+                <div class="store-select-info">
+                    <div class="store-select-name">全部店鋪</div>
+                </div>
+            </div>
+            
+            <div class="store-select-item selected" onclick="toggleSelect(this)">
+                <div class="checkbox">✓</div>
+                <div class="store-select-icon">🍜</div>
+                <div class="store-select-info">
+                    <div class="store-select-name">銅鑼灣店</div>
+                    <div class="store-select-location">銅鑼灣軒尼斯道500號</div>
+                </div>
+            </div>
+            
+            <div class="store-select-item selected" onclick="toggleSelect(this)">
+                <div class="checkbox">✓</div>
+                <div class="store-select-icon">🍜</div>
+                <div class="store-select-info">
+                    <div class="store-select-name">尖沙咀店</div>
+                    <div class="store-select-location">尖沙咀彌敦道100號</div>
+                </div>
+            </div>
+            
+            <div class="store-select-item" onclick="toggleSelect(this)">
+                <div class="checkbox"></div>
+                <div class="store-select-icon">🍜</div>
+                <div class="store-select-info">
+                    <div class="store-select-name">中環店</div>
+                    <div class="store-select-location">中環德輔道中100號</div>
+                </div>
+            </div>
+            
+            <div class="store-select-item" onclick="toggleSelect(this)">
+                <div class="checkbox"></div>
+                <div class="store-select-icon">🍜</div>
+                <div class="store-select-info">
+                    <div class="store-select-name">旺角店</div>
+                    <div class="store-select-location">旺角彌敦道700號</div>
+                </div>
+            </div>
+            
+            <div class="store-select-item" onclick="toggleSelect(this)">
+                <div class="checkbox"></div>
+                <div class="store-select-icon">🍜</div>
+                <div class="store-select-info">
+                    <div class="store-select-name">九龍塘店</div>
+                    <div class="store-select-location">九龍塘達之路80號</div>
+                </div>
+            </div>
+
+            <button class="btn-apply" onclick="closeStoreModal()">確定</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Chart
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const salesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['一', '二', '三', '四', '五', '六', '日'],
+                datasets: [{
+                    label: '營業額',
+                    data: [12500, 13200, 12800, 14500, 15200, 16800, 14200],
+                    backgroundColor: 'rgba(0, 102, 204, 0.8)',
+                    borderRadius: 8,
+                    borderSkipped: false,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '$' + context.raw.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#F0F0F0' },
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + (value/1000) + 'k';
+                            }
+                        }
+                    },
+                    x: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Date Selection
+        function selectDate(element, period) {
+            document.querySelectorAll('.date-chip').forEach(chip => chip.classList.remove('active'));
+            element.classList.add('active');
+            
+            const dateText = {
+                'today': '今日',
+                'yesterday': '昨日',
+                'week': '本週',
+                'month': '本月',
+                'custom': '自訂'
+            };
+            document.getElementById('selectedDate').textContent = dateText[period];
+        }
+
+        // Store Modal
+        function showStoreModal() {
+            document.getElementById('storeModal').classList.add('show');
+        }
+
+        function closeStoreModal() {
+            document.getElementById('storeModal').classList.remove('show');
+            
+            // Update selected stores text
+            const selected = document.querySelectorAll('.store-select-item.selected').length;
+            const total = document.querySelectorAll('.store-select-item').length - 1; // minus "全部店鋪"
+            
+            if (selected <= 1) {
+                document.getElementById('selectedStores').textContent = '全部店鋪';
+            } else if (selected - 1 === total) {
+                document.getElementById('selectedStores').textContent = '全部店鋪';
+            } else {
+                document.getElementById('selectedStores').textContent = '已選 ' + (selected - 1) + ' 間店';
+            }
+        }
+
+        function toggleSelect(element) {
+            // Don't allow deselecting "全部店鋪"
+            if (element.querySelector('.store-select-name').textContent === '全部店鋪') {
+                document.querySelectorAll('.store-select-item').forEach(item => {
+                    item.classList.remove('selected');
+                    item.querySelector('.checkbox').textContent = '';
+                });
+                element.classList.add('selected');
+                element.querySelector('.checkbox').textContent = '✓';
+                return;
+            }
+            
+            element.classList.toggle('selected');
+            
+            if (element.classList.contains('selected')) {
+                element.querySelector('.checkbox').textContent = '✓';
+            } else {
+                element.querySelector('.checkbox').textContent = '';
+            }
+        }
+
+        function showDateModal() {
+            // Placeholder for date modal
+            alert('日期選擇器');
+        }
+
+        // Touch feedback
+        document.querySelectorAll('.store-item, .filter-btn, .date-chip, .nav-item').forEach(el => {
+            el.addEventListener('touchstart', function() {
+                this.style.opacity = '0.7';
+            });
+            el.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+            });
+        });
+    </script>
+
+</body>
+</html>
